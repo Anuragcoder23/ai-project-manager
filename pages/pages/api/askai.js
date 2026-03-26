@@ -1,15 +1,14 @@
 export default async function handler(req, res) {
 
   if (req.method !== "POST") {
-    res.status(405).json({ message: "Method not allowed" });
-    return;
+    return res.status(405).json({ error: "Only POST allowed" });
   }
 
   try {
 
-    const question = req.body.question;
+    const { question } = req.body;
 
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const ai = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -18,27 +17,21 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "openai/gpt-oss-20b",
         messages: [
-          {
-            role: "system",
-            content: "You are an AI project manager assistant."
-          },
-          {
-            role: "user",
-            content: question
-          }
+          { role: "system", content: "You are an AI project manager assistant." },
+          { role: "user", content: question }
         ]
       })
     });
 
-    const data = await response.json();
+    const data = await ai.json();
 
-    res.status(200).json({
+    return res.status(200).json({
       answer: data?.choices?.[0]?.message?.content || "No response"
     });
 
-  } catch (error) {
+  } catch (err) {
 
-    res.status(500).json({
+    return res.status(500).json({
       error: "AI request failed"
     });
 
