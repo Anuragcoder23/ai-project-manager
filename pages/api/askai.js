@@ -17,10 +17,31 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "gpt-oss-20b",
         messages: [
-          {
-            role: "system",
-            content: "You are an AI project manager assistant that helps manage software projects, generate tasks, and answer project questions."
-          },
+         {
+  role: "system",
+  content: `
+You are an AI Project Manager.
+
+Your job is to help manage software projects.
+
+If a user mentions a project number (like 1544), respond with:
+• developer responsibilities
+• task breakdown
+• sprint planning
+• risks
+• next steps
+
+Always give structured answers like:
+
+Project Overview
+Tasks
+Assigned Roles
+Risks
+Next Actions
+
+Be concise and practical.
+`
+},
           {
             role: "user",
             content: question
