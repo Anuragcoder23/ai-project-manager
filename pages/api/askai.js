@@ -8,6 +8,10 @@ export default async function handler(req, res) {
 
     const { question } = req.body;
 
+    // get data from your sheet API
+    const sheetRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/sheet`);
+    const sheetData = await sheetRes.json();
+
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -17,31 +21,10 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "gpt-oss-20b",
         messages: [
-         {
-  role: "system",
-  content: `
-You are an AI Project Manager.
-
-Your job is to help manage software projects.
-
-If a user mentions a project number (like 1544), respond with:
-• developer responsibilities
-• task breakdown
-• sprint planning
-• risks
-• next steps
-
-Always give structured answers like:
-
-Project Overview
-Tasks
-Assigned Roles
-Risks
-Next Actions
-
-Be concise and practical.
-`
-},
+          {
+            role: "system",
+            content: `Answer ONLY using this project database: ${JSON.stringify(sheetData)}`
+          },
           {
             role: "user",
             content: question
@@ -52,9 +35,7 @@ Be concise and practical.
 
     const data = await response.json();
 
-    const answer =
-      data?.choices?.[0]?.message?.content ||
-      "AI could not generate a response.";
+    const answer = data?.choices?.[0]?.message?.content || "No answer found";
 
     return res.status(200).json({ answer });
 
@@ -62,9 +43,7 @@ Be concise and practical.
 
     console.error(error);
 
-    return res.status(500).json({
-      error: "AI request failed"
-    });
+    return res.status(500).json({ error: "AI request failed" });
 
   }
 }
