@@ -1,12 +1,13 @@
 export default async function handler(req, res) {
 
   if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
+    res.status(405).json({ message: "Method not allowed" });
+    return;
   }
 
   try {
 
-    const { question } = req.body;
+    const question = req.body.question;
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -32,7 +33,7 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     res.status(200).json({
-      answer: data.choices?.[0]?.message?.content || "No response"
+      answer: data?.choices?.[0]?.message?.content || "No response"
     });
 
   } catch (error) {
